@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Task List</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style>
+		table {
+			border-collapse: collapse;
+			width: 100%;
+		}
+		
+		th, td {
+			text-align: left;
+			padding: 8px;
+			border-bottom: 1px solid grey;
+		}
+		
+		th {
+			background-color: greenyellow;
+			color: white;
+		}
+		
+		tr:hover {
+			background-color: rgb(190, 187, 187);
+		}
+	</style>
+</head>
+<body>
+	<h1>Task List</h1>
+	
+	<div>
+		<label for="search">Search:</label>
+		<input type="text" id="search" name="search" placeholder="Enter a search term...">
+		<button onclick="searchTasks()">Go</button>
+	</div>
+	
+	<table id="task-table">
+		<thead>
+			<tr>
+				<th>Task Name</th>
+				<th>Description</th>
+				<th>Due Date</th>
+				<th>Task List</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+	
+	<script>
+        // console.log("hello")
+        // function getTasks() {
+        //     fetch(`http://localhost:5000/api/tasklist`)
+        //     .then(res => res.json())
+        //     .then(data => {
+        //         console.log(data);
+        //         // rest of the code to display tasks
+        //     })
+        //     .catch(err => console.error(err));
+        // }
+        // getTasks()
+
+		const apiUrl = 'http://localhost:5000/api/tasklist';
+		const tableBody = document.querySelector('#task-table tbody');
+		const searchInput = document.querySelector('#search');
+		
+		async function getTasks(page = 1, limit = 10, searchText = '') {
+			const url = `${apiUrl}?page=${page}&limit=${limit}&searchText=${searchText}`;
+			const response = await fetch(url);
+			const data = await response.json();
+			return data.tasks;
+		}
+
+		
+		function renderTasks(tasks) {
+			tableBody.innerHTML = '';
+			tasks.forEach(task => {
+				const tr = document.createElement('tr');
+				const tdName = document.createElement('td');
+				tdName.textContent = task.taskName;
+				const tdDesc = document.createElement('td');
+				tdDesc.textContent = task.description;
+				const tdDue = document.createElement('td');
+				tdDue.textContent = task.dueDate;
+				const tdList = document.createElement('td');
+				tdList.textContent = task.taskListName;
+				tr.appendChild(tdName);
+				tr.appendChild(tdDesc);
+				tr.appendChild(tdDue);
+				tr.appendChild(tdList);
+				tableBody.appendChild(tr);
+			});
+		}
+		
+		async function searchTasks() {
+			const searchText = searchInput.value.trim();
+			const tasks = await getTasks(1, 10, searchText);
+			renderTasks(tasks);
+		}
+		
+		async function init() {
+			const tasks = await getTasks();
+			renderTasks(tasks);
+		}
+		
+		init();
+	</script>
+</body>
+</html>
